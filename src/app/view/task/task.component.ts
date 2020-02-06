@@ -1,9 +1,12 @@
 
 
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {DataHandlerService} from '../../service/data-handler.service';
 import {Task} from  '../../model/task';
-import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
+import {EditTaskDialogComponent} from '../../dialog/edit-task-dialog/edit-task-dialog.component';
+import {MatDialog, MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
+
+
 @Component({
   selector: 'app-task',
   templateUrl: './task.component.html',
@@ -17,18 +20,27 @@ export class TaskComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator, {static: false}) private paginator: MatPaginator;
   @ViewChild(MatSort, {static: false}) private sort: MatSort;
 
-  tasks: Task[];
 
-  constructor(private dataHandler: DataHandlerService ) { }
+  private tasks: Task[];
+
+  @Input('tasks')
+  private set setTasks(tasks: Task[]) { // напрямую не присваиваем значения в переменную, только через @Input
+    this.tasks = tasks;
+    this.refreshTable();
+  }
+  @Output()
+  updateTask = new EventEmitter<Task>();
+  constructor(private dataHandler: DataHandlerService,private dialog:MatDialog) { }
   /*
 
     ngOnInit() {
       this.tasks = this.dataHandler.getTasks()
     }
   */
+
   ngOnInit() {
-    //  this.tasks = this.dataHandler.getTasks();
-    this.dataHandler.taskSubject.subscribe(tasks => this.tasks = tasks);
+    // this.tasks = this.dataHandler.getTasks();
+   this.dataHandler.getAllTasks().subscribe(tasks => this.tasks = tasks);
     this.dataSource = new MatTableDataSource();
     this.refreshTable();
 
@@ -66,6 +78,7 @@ export class TaskComponent implements OnInit, AfterViewInit {
 
   private refreshTable() {
 
+
     this.dataSource.data = this.tasks; // обновить источник данных (т.к. данные массива tasks обновились)
 
     this.addTableObjects();
@@ -102,4 +115,26 @@ export class TaskComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.paginator; // обновить компонент постраничности (кол-во записей, страниц)
   }
 
-}
+  onClickTask(task: Task) {
+    this.updateTask.emit(task)
+  }
+
+  openEditTaskDialog(task: Task) {
+    // открытие диалогового окна
+    const dialogRef = this.dialog.open(EditTaskDialogComponent, {
+      data: [task, 'Редактирование задачи'],
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // обработка результатов
+
+      if (result as Task) { // если нажали ОК и есть результат
+        this.updateTask.emit(task);
+        return;
+      }
+
+    });
+  }
+
+ }

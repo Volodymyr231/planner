@@ -2,43 +2,36 @@ import { Injectable } from '@angular/core';
 import {Category} from '../model/category';
 import {Task} from '../model/task';
 import {TestData} from '../data/TestData';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {TaskDAOArrayImpl} from '../dao/impl/task-daoarray-impl';
+import {CategoryDAOArrayImpl} from '../dao/impl/category-daoarray-impl';
+import {Priority} from '../model/priority';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataHandlerService {
 
-  taskSubject = new BehaviorSubject<Task[]>(TestData.tasks);
-  categoriesSubject = new BehaviorSubject<Category[]>(TestData.categories);
+  private taskDaoArray = new TaskDAOArrayImpl();
+  private categoryArray = new CategoryDAOArrayImpl();
+
 
   constructor() {
-    this.fetchTasks();
   }
 
-  getCategories(): Category[] {
-    return  TestData.categories;
+  getAllTasks(): Observable<Task[]> {
+    return this.taskDaoArray.getAll();
+  }
+  getAllCategories(): Observable<Category[]> {
+    console.log(this.categoryArray.getAll());
+    return this.categoryArray.getAll();
+  }
+  // поиск задач по параметрам
+  searchTasks(category: Category, searchText: string, status: boolean, priority: Priority): Observable<Task[]> {
+    return this.taskDaoArray.search(category, searchText, status, priority);
   }
 
-  fetchTasks(){
-    this.taskSubject.next(TestData.tasks);
+  updateTask(task: Task) {
+    return this.taskDaoArray.update(task);
   }
-  getTasks(): Task[] {
-    return TestData.tasks;
-  }
-
-
-  getTasksByCategory(category: Category): Task[] {
-    const tasks = TestData.tasks.filter(task => task.category === category);
-    console.log(tasks);
-    return tasks;
-  }
-
-  fetchTasksByCategory(category: Category) {
-    const tasks = TestData.tasks.filter(task => task.category === category);
-    console.log(tasks);
-    this.taskSubject.next(tasks);
-  }
-
-
 }
