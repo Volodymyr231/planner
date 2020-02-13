@@ -15,7 +15,6 @@ export class DataHandlerService {
 
   private taskDaoArray = new TaskDAOArrayImpl();
   private categoryArray = new CategoryDAOArrayImpl();
-
   private priorityDaoArray = new PriorityDAOAraayImpl();
 
   constructor() {
@@ -40,4 +39,9 @@ export class DataHandlerService {
   getAllPriorities(): Observable<Priority[]>{
     return  this.priorityDaoArray.getAll();
   }
+
+  deleteTask(id: number): Observable<Task> {
+    return this.taskDaoArray.delete(id);
+  }
+
 }

@@ -28,9 +28,13 @@ export class TaskComponent implements OnInit, AfterViewInit {
     this.tasks = tasks;
     this.refreshTable();
   }
+
   @Output()
   updateTask = new EventEmitter<Task>();
   constructor(private dataHandler: DataHandlerService,private dialog:MatDialog) { }
+
+  @Output()
+  deleteTask = new EventEmitter<Task>();
   /*
 
     ngOnInit() {
@@ -129,10 +133,29 @@ export class TaskComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       // обработка результатов
 
+      if (result === 'complete') {
+        task.completed = true; // ставим статус задачи как выполненная
+        this.updateTask.emit(task);
+      }
+
+
+      if (result === 'activate') {
+        task.completed = false; // возвращаем статус задачи как невыполненная
+        this.updateTask.emit(task);
+        return;
+      }
+
+      if (result === 'delete') {
+        this.deleteTask.emit(task);
+        return;
+      }
+
       if (result as Task) { // если нажали ОК и есть результат
         this.updateTask.emit(task);
         return;
       }
+
+
 
     });
   }
