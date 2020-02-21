@@ -5,6 +5,10 @@ import {DataHandlerService} from '../../service/data-handler.service';
 import {Task} from  '../../model/task';
 import {EditTaskDialogComponent} from '../../dialog/edit-task-dialog/edit-task-dialog.component';
 import {MatDialog, MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
+import {ConfirmDialogComponent} from '../../dialog/confirm-dialog/confirm-dialog.component';
+import {Priority} from '../../model/priority';
+import {Category} from '../../model/category';
+import {OperType} from '../../dialog/oper-type.enum';
 
 
 @Component({
@@ -14,14 +18,22 @@ import {MatDialog, MatPaginator, MatSort, MatTableDataSource} from '@angular/mat
 })
 export class TaskComponent implements OnInit, AfterViewInit {
 
-  displayedColumns: string[] = ['color', 'id', 'name', 'date', 'priority', 'category'];
+  private displayedColumns: string[] = ['color', 'id', 'name', 'date', 'priority', 'category', 'operations', 'select'];
   dataSource: MatTableDataSource<Task>; // контейнер - источник данных для таблицы
 
   @ViewChild(MatPaginator, {static: false}) private paginator: MatPaginator;
   @ViewChild(MatSort, {static: false}) private sort: MatSort;
 
-
+// поиск
+  private searchTaskText: string; // текущее значение для поиска задач
+  private selectedStatusFilter: boolean = null;   // по-умолчанию будут показываться задачи по всем статусам (решенные и нерешенные)
+  private selectedPriorityFilter: Priority = null;   // по-умолчанию будут показываться задачи по всем приоритетам
+  private priorities: Priority[]; // список приоритетов (для фильтрации задач)
   private tasks: Task[];
+
+  @Input()
+  selectedCategory: Category;
+
 
   @Input('tasks')
   private set setTasks(tasks: Task[]) { // напрямую не присваиваем значения в переменную, только через @Input
@@ -30,11 +42,34 @@ export class TaskComponent implements OnInit, AfterViewInit {
   }
 
   @Output()
+  selectCategory = new EventEmitter<Category>(); // нажали на категорию из списка задач
+
+  @Output()
+  filterByTitle = new EventEmitter<string>();
+
+  @Output()
+  filterByStatus = new EventEmitter<boolean>();
+
+  @Output()
   updateTask = new EventEmitter<Task>();
-  constructor(private dataHandler: DataHandlerService,private dialog:MatDialog) { }
 
   @Output()
   deleteTask = new EventEmitter<Task>();
+
+  @Output()
+  filterByPriority = new EventEmitter<Priority>();
+
+  @Output()
+  addTask = new EventEmitter<Task>();
+
+
+  @Input('priorities')
+  set setPriorities(priorities: Priority[]) {
+    this.priorities = priorities;
+  }
+  constructor(private dataHandler: DataHandlerService,private dialog:MatDialog) { }
+
+
   /*
 
     ngOnInit() {
@@ -126,7 +161,7 @@ export class TaskComponent implements OnInit, AfterViewInit {
   openEditTaskDialog(task: Task) {
     // открытие диалогового окна
     const dialogRef = this.dialog.open(EditTaskDialogComponent, {
-      data: [task, 'Редактирование задачи'],
+      data: [task, 'Редактирование задачи', OperType.EDIT],
       autoFocus: false
     });
 
@@ -160,4 +195,67 @@ export class TaskComponent implements OnInit, AfterViewInit {
     });
   }
 
- }
+  private openDeleteDialog(task: Task) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      maxWidth: '500px',
+      data: {dialogTitle: 'Подтвердите действие', message: `Вы действительно хотите удалить задачу: "${task.name}"?`},
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) { // если нажали ОК
+        this.deleteTask.emit(task);
+      }
+    });
+  }
+
+  private onToggleStatus(task: Task) {
+    task.completed = !task.completed;
+    this.updateTask.emit(task);
+  }
+
+  // фильтрация по названию
+  private onFilterByTitle() {
+    this.filterByTitle.emit(this.searchTaskText);
+  }
+
+
+  private onFilterByStatus(value: boolean) {
+
+    // на всякий случай проверяем изменилось ли значение (хотя сам гуишный компонент должен это делать)
+    if (value !== this.selectedStatusFilter) {
+      this.selectedStatusFilter = value;
+      this.filterByStatus.emit(this.selectedStatusFilter);
+    }
+
+
+  }
+
+  // фильтрация по приоритету
+  private onFilterByPriority(value: Priority) {
+
+    // на всякий случай проверяем изменилось ли значение (хотя сам UI компонент должен это делать)
+    if (value !== this.selectedPriorityFilter) {
+      this.selectedPriorityFilter = value;
+      this.filterByPriority.emit(this.selectedPriorityFilter);
+    }
+  }
+
+// диалоговое окно для добавления задачи
+  private openAddTaskDialog() {
+
+    // то же самое, что и при редактировании, но только передаем пустой объект Task
+    const task = new Task(null, '', false, null, this.selectedCategory);
+
+
+    const dialogRef = this.dialog.open(EditTaskDialogComponent, {data: [task, 'Добавление задачи', OperType.ADD]});
+
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) { // если нажали ОК и есть результат
+        this.addTask.emit(task);
+      }
+    });
+
+  }
+}

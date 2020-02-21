@@ -7,6 +7,7 @@ import {TaskDAOArrayImpl} from '../dao/impl/task-daoarray-impl';
 import {CategoryDAOArrayImpl} from '../dao/impl/category-daoarray-impl';
 import {Priority} from '../model/priority';
 import {PriorityDAOAraayImpl} from '../dao/impl/priority-daoarray';
+import {CategoryDAO} from '../dao/interface/category-dao';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ import {PriorityDAOAraayImpl} from '../dao/impl/priority-daoarray';
 export class DataHandlerService {
 
   private taskDaoArray = new TaskDAOArrayImpl();
-  private categoryArray = new CategoryDAOArrayImpl();
+  private categoryDaoArray = new CategoryDAOArrayImpl();
   private priorityDaoArray = new PriorityDAOAraayImpl();
 
   constructor() {
@@ -24,8 +25,8 @@ export class DataHandlerService {
     return this.taskDaoArray.getAll();
   }
   getAllCategories(): Observable<Category[]> {
-    console.log(this.categoryArray.getAll());
-    return this.categoryArray.getAll();
+    console.log(this.categoryDaoArray.getAll());
+    return this.categoryDaoArray.getAll();
   }
   // поиск задач по параметрам
   searchTasks(category: Category, searchText: string, status: boolean, priority: Priority): Observable<Task[]> {
@@ -44,4 +45,16 @@ export class DataHandlerService {
     return this.taskDaoArray.delete(id);
   }
 
+
+  updateCategory(category: Category): Observable<Category> {
+    return this.categoryDaoArray.update(category);
+  }
+
+  deleteCategory(id: number): Observable<Category> {
+    return this.categoryDaoArray.delete(id);
+  }
+
+  addTask(task: Task): Observable<Task> {
+    return this.taskDaoArray.add(task);
+  }
 }

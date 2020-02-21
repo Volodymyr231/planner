@@ -1,10 +1,18 @@
 <div class="wrapper ">
 
-  <app-category   (tellToSubscribers) = "onSelectCategory($event)"
-                  [categories]="categories"></app-category>
+  <app-category
+
+    (selectCategory)="onSelectCategory($event)"
+    (deleteCategory)="onDeleteCategory($event)"
+    (updateCategory)="onUpdateCategory($event)"
+
+    [selectedCategory]="selectedCategory"
+    [categories]="categories">
+
+  </app-category>
 
 <div class="main-panel">
-    <!-- Navbar -->
+    <!--Navbar-->
     <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
       <div class="container-fluid">
         <div class="navbar-wrapper">
@@ -71,10 +79,24 @@
     </nav>
     <!-- End Navbar -->
     <div class="content">
-      <app-task [tasks]="tasks"
-                (deleteTask)="onDeleteTask($event)"
-                (updateTask) = "onUpdateTask($event)">
-      </app-task>
+      <app-task
+
+        (updateTask)="onUpdateTask($event)"
+        (deleteTask)="onDeleteTask($event)"
+        (selectCategory)="onSelectCategory($event)"
+        (addTask)="onAddTask($event)"
+
+
+        [selectedCategory]="selectedCategory"
+        (filterByTitle)="onSearchTasks($event)"
+        (filterByPriority)="onFilterByPriority($event)"
+        (filterByStatus)="onFilterTasksByStatus($event)"
+
+        [tasks]="tasks"
+        [priorities]="priorities"
+
+
+        ></app-task>
 
     </div>
     <footer class="footer">
