@@ -5,11 +5,12 @@
     (selectCategory)="onSelectCategory($event)"
     (deleteCategory)="onDeleteCategory($event)"
     (updateCategory)="onUpdateCategory($event)"
-
+    (addCategory)="onAddCategory($event)"
     [selectedCategory]="selectedCategory"
-    [categories]="categories">
+    [categories]="categories"
+    (searchCategory)="onSearchCategory($event)"
 
-  </app-category>
+ > </app-category>
 
 <div class="main-panel">
     <!--Navbar-->

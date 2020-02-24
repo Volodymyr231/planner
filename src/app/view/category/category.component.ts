@@ -36,6 +36,9 @@ export class CategoryComponent implements OnInit {
   @Input()
   selectedCategory: Category;
 
+  @Output()
+  searchCategory = new EventEmitter<string>(); // передаем строку для поиска
+
 // для отображения иконки редактирования при наведении на категорию
   private indexMouseMove: number
 
@@ -96,6 +99,7 @@ export class CategoryComponent implements OnInit {
     });
   }
   // диалоговое окно для добавления категории
+  searchCategoryTitle: string;
   private openAddDialog() {
 
     const dialogRef = this.dialog.open(EditCategoryDialogComponent, {data: ['', 'Добавление категории', OperType.ADD], width: '400px'});
@@ -107,4 +111,15 @@ export class CategoryComponent implements OnInit {
     });
   }
 
+// поиск категории
+  private search() {
+
+
+    if (this.searchCategoryTitle == null ) {
+      return;
+    }
+
+    this.searchCategory.emit(this.searchCategoryTitle);
+
+  }
 }
