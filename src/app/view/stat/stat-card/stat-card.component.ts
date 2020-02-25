@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-stat-card',
@@ -6,6 +6,20 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./stat-card.component.css']
 })
 export class StatCardComponent implements OnInit {
+  @Input()
+  completed = false;
+
+  @Input()
+  iconName: string;
+
+  @Input()
+  count1: any; // можно передавать любой тип для отображения (число, текст и пр.)
+
+  @Input()
+  countTotal: any;
+
+  @Input()
+  title: string;
 
   constructor() { }
 
